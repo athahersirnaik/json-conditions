@@ -1,15 +1,6 @@
-/** Used to match property names within property paths. */
 const reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/
 const reIsPlainProp = /^\w*$/
 
-/**
- * Checks if `value` is a property name and not a property path.
- *
- * @private
- * @param {*} value The value to check.
- * @param {Object} [object] The object to query keys on.
- * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
- */
 function isKey(value, object) {
 	if (Array.isArray(value)) {
 		return false
@@ -38,13 +29,6 @@ const rePropName = RegExp(
 	'(?=(?:\\.|\\[\\])(?:\\.|\\[\\]|$))'
 	, 'g')
 
-/**
-* Converts `string` to a property path array.
-*
-* @private
-* @param {string} string The string to convert.
-* @returns {Array} Returns the property path array.
-*/
 const stringToPath = (string) => {
 	const result = []
 	if (string.charCodeAt(0) === charCodeOfDot) {
@@ -63,14 +47,6 @@ const stringToPath = (string) => {
 	return result
 }
 
-/**
- * Casts `value` to a path array if it's not one.
- *
- * @private
- * @param {*} value The value to inspect.
- * @param {Object} [object] The object to query keys on.
- * @returns {Array} Returns the cast property path array.
- */
 function castPath(value, object) {
 	if (Array.isArray(value)) {
 		return value
@@ -78,13 +54,6 @@ function castPath(value, object) {
 	return isKey(value, object) ? [value] : stringToPath(value)
 }
 
-/**
- * Converts `value` to a string key if it's not a string or symbol.
- *
- * @private
- * @param {*} value The value to inspect.
- * @returns {string|symbol} Returns the key.
- */
 function toKey(value) {
 	if (typeof value === 'string') {
 		return value
@@ -93,14 +62,6 @@ function toKey(value) {
 	return result
 }
 
-/**
- * The base implementation of `get` without support for default values.
- *
- * @private
- * @param {Object} object The object to query.
- * @param {Array|string} path The path of the property to get.
- * @returns {*} Returns the resolved value.
- */
 function baseGet(object, path) {
 	path = castPath(path, object)
 
@@ -113,29 +74,6 @@ function baseGet(object, path) {
 	return (index && index == length) ? object : undefined
 }
 
-/**
- * Gets the value at `path` of `object`. If the resolved value is
- * `undefined`, the `defaultValue` is returned in its place.
- *
- * @since 3.7.0
- * @category Object
- * @param {Object} object The object to query.
- * @param {Array|string} path The path of the property to get.
- * @param {*} [defaultValue] The value returned for `undefined` resolved values.
- * @returns {*} Returns the resolved value.
- * @example
- *
- * const object = { 'a': [{ 'b': { 'c': 3 } }] }
- *
- * get(object, 'a[0].b.c')
- * // => 3
- *
- * get(object, ['a', '0', 'b', 'c'])
- * // => 3
- *
- * get(object, 'a.b.c', 'default')
- * // => 'default'
- */
 function get(object, path, defaultValue) {
 	const result = object == null ? undefined : baseGet(object, path)
 	return result === undefined ? defaultValue : result
@@ -145,12 +83,11 @@ function toString(value) {
 	if (value == null) {
 		return ''
 	}
-	// Exit early for strings to avoid a performance hit in some environments.
+
 	if (typeof value === 'string') {
 		return value
 	}
 	if (Array.isArray(value)) {
-		// Recursively convert values (susceptible to call stack limits).
 		return `${value.map((other) => other == null ? other : toString(other))}`
 	}
 
@@ -158,15 +95,6 @@ function toString(value) {
 	return result
 }
 
-
-/**
- * @param {object} settings
- * @param {object[]} settings.rules array of rules { property, op, value, required }
- * @param {string} settings.satisfy 'ALL' or 'ANY'
- * @param {function} settings.log Function to log the evaluation process for debugging
- * @param {object} testReference The object under test
- * @returns {boolean} Null if there are no rules,therwise true/alse depending on if testReference
- */
 function checkConditions(settings, reference) {
 	if (!(settings && Array.isArray(settings.rules))) return null;
 
@@ -174,7 +102,6 @@ function checkConditions(settings, reference) {
 	let requiredPassed = 0;
 	let normalPassed = 0;
 
-	// build an array of booleans based on the test results
 	const results = settings.rules.map((rule, index) => {
 		let error;
 		if (!rule.property) {
@@ -302,7 +229,6 @@ function checkConditions(settings, reference) {
 	);
 	const normalTotal = settings.rules.length - requiredTotal;
 
-	// Count how many conditions passed
 	const satisfy = settings.satisfy || "ANY";
 
 	const requiredSatisfied =
@@ -322,7 +248,6 @@ function checkConditions(settings, reference) {
 	debugStr += `Result: ${outcome ? "PASS" : "FAIL"}`;
 	if (settings.log) settings.log(debugStr);
 
-	// test the result
 	return outcome;
 }
 
