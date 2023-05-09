@@ -2,9 +2,6 @@ const reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/
 const reIsPlainProp = /^\w*$/
 
 function isKey(value, object) {
-	if (Array.isArray(value)) {
-		return false
-	}
 	const type = typeof value
 	if (type === 'number' || type === 'boolean' || value == null) {
 		return true
@@ -13,44 +10,20 @@ function isKey(value, object) {
 		(object != null && value in Object(object))
 }
 
-const charCodeOfDot = '.'.charCodeAt(0)
-const reEscapeChar = /\\(\\)?/g
 const rePropName = RegExp(
 	// Match anything that isn't a dot or bracket.
-	'[^.[\\]]+' + '|' +
-	// Or match property names within brackets.
-	'\\[(?:' +
-	// Match a non-string expression.
-	'([^"\'][^[]*)' + '|' +
-	// Or match strings (supports escaping characters).
-	'(["\'])((?:(?!\\2)[^\\\\]|\\\\.)*?)\\2' +
-	')\\]' + '|' +
-	// Or match "" as the space between consecutive dots or empty brackets.
-	'(?=(?:\\.|\\[\\])(?:\\.|\\[\\]|$))'
-	, 'g')
+	'[^.[\\]]+', 'g')
 
 const stringToPath = (string) => {
 	const result = []
-	if (string.charCodeAt(0) === charCodeOfDot) {
-		result.push('')
-	}
-	string.replace(rePropName, (match, expression, quote, subString) => {
-		let key = match
-		if (quote) {
-			key = subString.replace(reEscapeChar, '$1')
-		}
-		else if (expression) {
-			key = expression.trim()
-		}
-		result.push(key)
+	
+	string.replace(rePropName, (match) => {
+		result.push(match)
 	})
 	return result
 }
 
 function castPath(value, object) {
-	if (Array.isArray(value)) {
-		return value
-	}
 	return isKey(value, object) ? [value] : stringToPath(value)
 }
 
@@ -58,11 +31,10 @@ function toKey(value) {
 	if (typeof value === 'string') {
 		return value
 	}
-	const result = `${value}`
-	return result
+	return `${value}`
 }
 
-function baseGet(object, path) {
+function get(object, path) {
 	path = castPath(path, object)
 
 	let index = 0
@@ -74,11 +46,6 @@ function baseGet(object, path) {
 	return (index && index == length) ? object : undefined
 }
 
-function get(object, path, defaultValue) {
-	const result = object == null ? undefined : baseGet(object, path)
-	return result === undefined ? defaultValue : result
-}
-
 function toString(value) {
 	if (value == null) {
 		return ''
@@ -87,12 +54,8 @@ function toString(value) {
 	if (typeof value === 'string') {
 		return value
 	}
-	if (Array.isArray(value)) {
-		return `${value.map((other) => other == null ? other : toString(other))}`
-	}
 
-	const result = `${value}`
-	return result
+	return `${value}`
 }
 
 function checkConditions(settings, reference) {
@@ -193,7 +156,6 @@ function checkConditions(settings, reference) {
 					!(value || []).includes(targetValue);
 				break;
 			case "crosses":
-				console.log(typeof settings.previousValueFn);
 				if (typeof settings.previousValueFn !== "function") {
 					throw new Error(
 						'Comparison "crosses" selected, but no function supplied to return previous value'
