@@ -10,9 +10,7 @@ function isKey(value, object) {
 		(object != null && value in Object(object))
 }
 
-const rePropName = RegExp(
-	// Match anything that isn't a dot or bracket.
-	'[^.[\\]]+', 'g')
+const rePropName = RegExp('[^.[\\]]+', 'g')
 
 const stringToPath = (string) => {
 	const result = []
@@ -23,25 +21,14 @@ const stringToPath = (string) => {
 	return result
 }
 
-function castPath(value, object) {
-	return isKey(value, object) ? [value] : stringToPath(value)
-}
-
-function toKey(value) {
-	if (typeof value === 'string') {
-		return value
-	}
-	return `${value}`
-}
-
 function get(object, path) {
-	path = castPath(path, object)
+	path = isKey(path, object) ? [path] : stringToPath(path)
 
 	let index = 0
 	const length = path.length
 
 	while (object != null && index < length) {
-		object = object[toKey(path[index++])]
+		object = object[path[index++]]
 	}
 	return (index && index == length) ? object : undefined
 }
@@ -65,7 +52,7 @@ function checkConditions(settings, reference) {
 	let requiredPassed = 0;
 	let normalPassed = 0;
 
-	const results = settings.rules.map((rule, index) => {
+	settings.rules.map((rule, index) => {
 		let error;
 		if (!rule.property) {
 			error = new Error(`Property not specified for rule ${index}`);
